@@ -1,15 +1,55 @@
 #!/usr/bin/env python3
 
 import sys
-import pycurl
 from io import BytesIO
-from gnupg import GPG
 import os
 
 # ["ChiperSync.py","-h"]
 # ["ChiperSync","-U","file.txt","Passphrase"]
+import subprocess
+import importlib
 
-gpg = GPG()
+def ConfirmQ(question:str):
+    final = bool()
+
+    inp = input(f"{question} [Y/n] : ")
+    passed = [['Y','y'],['N','n']]
+
+    if inp[0] in passed[0]:
+        return True
+    elif inp[0] in passed[1]:
+        return False
+    else:
+        print('Unknown option!')
+        final = ConfirmQ(question)
+        return final
+
+
+
+def importPkg(packages:list):
+    noPkg = []
+    for pkg in packages:
+        try:
+            importlib.import_module(pkg)
+        except ImportError:
+            noPkg.append(pkg)
+
+    if len(noPkg)==0:
+        pass
+    elif len(noPkg)>0:
+        print('Required to install the following package/s :\n')
+        [print(f'    - {_}') for _ in noPkg]
+        install = ConfirmQ('\nContinue to install?')
+        if install == True:
+            print(noPkg)
+            subprocess.check_call(["pip3","install"]+noPkg)
+        elif install == False:
+            pass
+
+importPkg(["pycurl","python-gnupg"])
+
+
+gpg = gnupg.GPG()
 c = pycurl.Curl()
 
 
