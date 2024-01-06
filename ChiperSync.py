@@ -25,12 +25,14 @@ def ConfirmQ(question:str):
         return final
 
 
+modules = {}
 
 def importPkg(packages:list):
     noPkg = []
     for pkg in packages:
         try:
-            importlib.import_module(pkg)
+            pkg = importlib.import_module(pkg)
+            modules[pkg.__name__] = pkg
         except ImportError:
             noPkg.append(pkg)
 
@@ -41,17 +43,17 @@ def importPkg(packages:list):
         [print(f'    - {_}') for _ in noPkg]
         install = ConfirmQ('\nContinue to install?')
         if install == True:
-            print(noPkg)
+            print('')
             subprocess.check_call(["pip3","install"]+noPkg)
+            importPkg(packages)
         elif install == False:
-            pass
-
-importPkg(["pycurl","python-gnupg"])
+            exit()
 
 
-gpg = gnupg.GPG()
-c = pycurl.Curl()
+importPkg(["pycurl","gnupg"])
 
+gpg = modules['gnupg'].GPG()
+c = modules['pycurl'].Curl()
 
 if __name__ == "__main__":
     listArgs = sys.argv
