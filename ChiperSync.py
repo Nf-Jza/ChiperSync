@@ -26,30 +26,19 @@ def ConfirmQ(question:str):
 
 
 def installer():
-    importPkg(["pycurl","gnupg","PyInstaller"], doImport=False)
-    print("\nStarting to install, this may take a while.")
-    try:
-        currentFileName = os.path.basename(__file__).split(".")[0]
-    except:
-        print('Your current file is already an executable.')
-
-    subprocess.check_call(["pyinstaller", "--onefile",os.path.basename(__file__)])
-    subprocess.check_call(["mv","./dist","FinishedExecutable"])
-    os.remove(currentFileName+".spec")
-    shutil.rmtree("build")
-
-modules = {}
-
-def importPkg(packages:list,doImport:bool):
     noPkg = []
-    
-    for pkg in packages:
-        try:
-            pkg = importlib.import_module(pkg)
-            modules[pkg.__name__] = pkg
-        except ImportError:
-            noPkg.append(pkg)
-
+    try:
+        import gnupg
+    except ImportError:
+        noPkg.append('python-gnupg')
+    try:
+        import pycurl
+    except ImportError:
+        noPkg.append('pycurl')
+    try:
+        importlib.import_module('PyInstaller')
+    except ImportError:
+        noPkg.append('pyinstaller')
 
     if len(noPkg)==0:
         pass
@@ -60,19 +49,54 @@ def importPkg(packages:list,doImport:bool):
         if install == True:
             print('')
             subprocess.check_call(["pip3","install"]+noPkg)
-            if doImport == True:
-                importPkg(packages,doImport=True)
-            elif doImport == False:
-                pass
+            installer()
         elif install == False:
             exit()
 
+    if os.path.isfile('FinishedExecutable/ChiperSync'):
+        print("Executable file have already built and placed inside 'FinishedExecutable'")
+    else:
+        print("\nStarting to install, this may take a while.\n")
+        subprocess.check_call(["pyinstaller", "--onefile","--name","ChiperSync","origin/exec"])
+        subprocess.check_call(["mv","./dist","FinishedExecutable"])
+        os.remove("ChiperSync.spec")
+        shutil.rmtree("build")
 
-importPkg(["pycurl","gnupg"],doImport=True)
-gpg = modules['gnupg'].GPG()
-c = modules['pycurl'].Curl()
+
+
+
+
+def importPkg():
+    noPkg = []
+    try:
+        global gpg
+        from gnupg import GPG
+        gpg = GPG()
+    except ImportError:
+        noPkg.append('python-gnupg')
+
+    try:
+        global c
+        from pycurl import Curl
+        c = Curl()
+    except ImportError:
+        noPkg.append('pycurl')
+
+    if len(noPkg) > 0:
+        print('Required to install the following package/s :\n')
+        [print(f'    - {_}') for _ in noPkg]
+        install = ConfirmQ('\nContinue to install?')
+        if install:
+            print('')
+            subprocess.check_call(["pip3","install"] + noPkg)
+            importPkg()
+        else:
+            exit()
+ 
+
 
 if __name__ == "__main__":
+    
     listArgs = sys.argv
     helpString = """
 [ ChiperSync ]
@@ -93,6 +117,7 @@ A program for upload and download file with encryption support. And try to conne
     unknownCMD = 'Unknown command, use -h or --help for how to use.'
 
     def Upload(file:str,passp:str):
+        importPkg()
 
         tmpFile = ".ChiperSyncU.enc.tmp"
         returnStr = {}
@@ -118,7 +143,7 @@ A program for upload and download file with encryption support. And try to conne
             os.remove(tmpFile)
             final =  buffer.getvalue().decode()
             returnStr["Status"] = True
-            returnStr["StatusMessage"] = f"Successfully upload and encrypt -> {filePath}\n\nThe Url : {final}"
+            returnStr["StatusMessage"] = f"\nSuccessfully upload and encrypt -> {filePath}\n\nThe Url : {final}"
 
         except Exception as e:
             returnStr["Status"] = False
@@ -127,6 +152,7 @@ A program for upload and download file with encryption support. And try to conne
         return returnStr
 
     def Download(link:str,passp:str):
+        importPkg()
 
         tmpFile = ".ChiperSyncD.enc.tmp"
         filename = link.split("/")[-1]
@@ -144,7 +170,7 @@ A program for upload and download file with encryption support. And try to conne
                     final.write(decrypted_data.data)
 
             returnStr["Status"] = True
-            returnStr["StatusMessage"] = f"Successfully download and decrypt -> {filename}"
+            returnStr["StatusMessage"] = f"\nSuccessfully download and decrypt -> {filename}"
             os.remove(tmpFile)
         except Exception as e:
             returnStr["Status"] = False
