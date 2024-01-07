@@ -3,7 +3,7 @@
 import sys
 from io import BytesIO
 import os
-
+import shutil
 # ["ChiperSync.py","-h"]
 # ["ChiperSync","-U","file.txt","Passphrase"]
 import subprocess
@@ -25,16 +25,31 @@ def ConfirmQ(question:str):
         return final
 
 
+def installer():
+    importPkg(["pycurl","gnupg","PyInstaller"], doImport=False)
+    print("\nStarting to install, this may take a while.")
+    try:
+        currentFileName = os.path.basename(__file__).split(".")[0]
+    except:
+        print('Your current file is already an executable.')
+
+    subprocess.check_call(["pyinstaller", "--onefile",os.path.basename(__file__)])
+    subprocess.check_call(["mv","./dist","FinishedExecutable"])
+    os.remove(currentFileName+".spec")
+    shutil.rmtree("build")
+
 modules = {}
 
-def importPkg(packages:list):
+def importPkg(packages:list,doImport:bool):
     noPkg = []
+    
     for pkg in packages:
         try:
             pkg = importlib.import_module(pkg)
             modules[pkg.__name__] = pkg
         except ImportError:
             noPkg.append(pkg)
+
 
     if len(noPkg)==0:
         pass
@@ -45,13 +60,15 @@ def importPkg(packages:list):
         if install == True:
             print('')
             subprocess.check_call(["pip3","install"]+noPkg)
-            importPkg(packages)
+            if doImport == True:
+                importPkg(packages,doImport=True)
+            elif doImport == False:
+                pass
         elif install == False:
             exit()
 
 
-importPkg(["pycurl","gnupg"])
-
+importPkg(["pycurl","gnupg"],doImport=True)
 gpg = modules['gnupg'].GPG()
 c = modules['pycurl'].Curl()
 
@@ -62,11 +79,13 @@ if __name__ == "__main__":
 A program for upload and download file with encryption support. And try to connect to VPN first if this doesn't work.
 
     How to use :
-        ChiperSync [-U]/[-D] [filename]/[link] [passphrase]
+        ChiperSync [-U]/[-D]/[--makeExecutable] [filename]/[link] [passphrase]
         ex.
             ChiperSync -D https://transfer.sh/file.txt YourPassphrase
 
     Actions:
+        --makeExecutable | Make an executable file so the later usage you would'nt need to install the required package.
+            ex. python ChiperSync --makeExecutable
         -U,--upload | Upload a file
         -D,--download | Download a file
         -h, --help | Print this message
@@ -137,6 +156,8 @@ A program for upload and download file with encryption support. And try to conne
 
     if len(sys.argv) == 1:
         print(helpString)
+    elif listArgs[1]=='--makeExecutable':
+        installer()
     elif listArgs[1]=='-h' or listArgs[1]=='--help':
         print(helpString)
     elif listArgs[1]=='-U' or listArgs[1]=='--upload':
