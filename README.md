@@ -1,35 +1,35 @@
 # ChiperSync
 
-A python program for upload and download file with encryption support.
+A python program for upload and download file with encryption support. Encrypted with *AES256* by using `gnupg` before the file being upload to [free.keep.sh](https://free.keep.sh).
 
-# Heading 1
+***
 
-## Heading 2
+Just do
 
-### Heading 3
-
-**Bold Text**
-*Italic Text*
-
-* List Item 1
-* List Item 2
-* List Item 3
-
-1. Numbered Item 1
-2. Numbered Item 2
-3. Numbered Item 3
-   [Link Text](https://www.example.com)
-   ![Image Alt Text](image.jpg)
-
-> Blockquote Text
-> `Inline Code`
-
-```python
-def hello_world():
-    print("Hello, World!")
+```
+python ChiperSync.py
 ```
 
-| Column 1 | Column 2 |
-| -------- | -------- |
-| Cell 1   | Cell 2   |
-| Cell 3   | Cell 4   |
+If you have'nt installed required packages it'll automatically ask you to install them.
+
+***
+
+### Executable file
+
+To make an executable, meaning the later usage you dont need to install *python* or any other packages. You can do :
+
+```
+python ChiperSync.py --makeExecutable
+```
+
+The executable file will placed inside folder `FinishedExecutable` . And after that you can do just simply do
+
+```
+./ChiperSync
+```
+
+you can placed it inside your bin directory, so you can call it everywhere.
+
+```
+mv ChiperSync ~/../usr/bin/
+```
