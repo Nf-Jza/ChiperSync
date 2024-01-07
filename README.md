@@ -22,7 +22,6 @@ To make an executable, meaning the later usage you dont need to install *python*
 python ChiperSync.py --makeExecutable
 ```
 
-$ python ChiperSync.py
 The executable file will placed inside folder `FinishedExecutable` . And after that you can do just simply do
 
 ```
