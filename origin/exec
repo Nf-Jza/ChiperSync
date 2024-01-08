@@ -25,8 +25,6 @@ A program for upload and download file with encryption support. And try to conne
             ChiperSync -D https://transfer.sh/file.txt YourPassphrase
 
     Actions:
-        --makeExecutable | Make an executable file so the later usage you would'nt need to install the required package.
-            ex. python ChiperSync --makeExecutable
         -U,--upload | Upload a file
         -D,--download | Download a file
         -h, --help | Print this message
