@@ -3,13 +3,11 @@
 import sys
 from io import BytesIO
 import os
-import shutil
 import requests
 
 # ["ChiperSync.py","-h"]
 # ["ChiperSync","-U","file.txt","Passphrase"]
 import subprocess
-import importlib
 
 
 def ConfirmQ(question: str):
@@ -26,48 +24,6 @@ def ConfirmQ(question: str):
         print("Unknown option!")
         final = ConfirmQ(question)
         return final
-
-
-def installer():
-    noPkg = []
-    try:
-        import gnupg
-    except ImportError:
-        noPkg.append("python-gnupg")
-    try:
-        import pycurl
-    except ImportError:
-        noPkg.append("pycurl")
-    try:
-        importlib.import_module("PyInstaller")
-    except ImportError:
-        noPkg.append("pyinstaller")
-
-    if len(noPkg) == 0:
-        pass
-    elif len(noPkg) > 0:
-        print("Required to install the following package/s :\n")
-        [print(f"    - {_}") for _ in noPkg]
-        install = ConfirmQ("\nContinue to install?")
-        if install == True:
-            print("")
-            subprocess.check_call(["pip3", "install"] + noPkg)
-            installer()
-        elif install == False:
-            exit()
-
-    if os.path.isfile("FinishedExecutable/ChiperSync"):
-        print(
-            "Executable file have already built and placed inside 'FinishedExecutable'"
-        )
-    else:
-        print("\nStarting to install, this may take a while.\n")
-        subprocess.check_call(
-            ["pyinstaller", "--onefile", "--name", "ChiperSync", "origin/exec"]
-        )
-        subprocess.check_call(["mv", "./dist", "FinishedExecutable"])
-        os.remove("ChiperSync.spec")
-        shutil.rmtree("build")
 
 
 def importPkg():
@@ -113,8 +69,6 @@ A program for upload and download file with encryption support. And try to conne
             ChiperSync -D https://transfer.sh/file.txt YourPassphrase
 
     Actions:
-        --makeExecutable | Make an executable file so the later usage you would'nt need to install the required package.
-            ex. python ChiperSync --makeExecutable
         -U,--upload | Upload a file
         -D,--download | Download a file
         -h, --help | Print this message
@@ -198,8 +152,6 @@ A program for upload and download file with encryption support. And try to conne
 
     if len(sys.argv) == 1:
         print(helpString)
-    elif listArgs[1] == "--makeExecutable":
-        installer()
     elif listArgs[1] == "-h" or listArgs[1] == "--help":
         print(helpString)
     elif listArgs[1] == "-U" or listArgs[1] == "--upload":
